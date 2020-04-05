@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import javax.validation.Valid;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,12 +23,16 @@ import org.springframework.web.bind.annotation.RestController;
 import com.eqarus.app.ws.exceptions.UserServiceException;
 import com.eqarus.app.ws.ui.model.request.UserRequest;
 import com.eqarus.app.ws.ui.model.response.UserRest;
+import com.eqarus.app.ws.userservice.UserService;
 
 @RestController
 @RequestMapping("users") // http://localhost:8080/users
 public class UserController {
 
 	Map<String, UserRest> users;
+	
+	@Autowired
+	UserService userService;
 
 	@GetMapping
 	public String getUsers(@RequestParam(value = "page", defaultValue = "1") int page,
@@ -49,13 +54,10 @@ public class UserController {
 		 * int fnLength = firstName.length();
 		 */
 
-		if (true)
-			throw new UserServiceException("My user service exception");
-
 		if (users.containsKey(userId)) {
 			return new ResponseEntity<>(users.get(userId), HttpStatus.OK);
 		} else {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			throw new UserServiceException("User doesn't exist exception");
 		}
 
 	}
@@ -63,17 +65,8 @@ public class UserController {
 	@PostMapping(consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = {
 			MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<UserRest> createUser(@Valid @RequestBody UserRequest userDetails) {
-		UserRest returnValue = new UserRest();
-		returnValue.setEmail(userDetails.getEmail());
-		returnValue.setFirstName(userDetails.getFirstName());
-		returnValue.setLastName(userDetails.getLastName());
-
-		String userId = UUID.randomUUID().toString();
-		returnValue.setUserId(userId);
-		if (users == null)
-			users = new HashMap<>();
-		users.put(userId, returnValue);
-
+		
+		UserRest returnValue = userService.createUser(userDetails);
 		return new ResponseEntity<UserRest>(returnValue, HttpStatus.OK);
 	}
 
