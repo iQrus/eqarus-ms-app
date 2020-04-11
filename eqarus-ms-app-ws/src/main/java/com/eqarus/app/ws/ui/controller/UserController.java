@@ -57,7 +57,7 @@ public class UserController {
 		if (users.containsKey(userId)) {
 			return new ResponseEntity<>(users.get(userId), HttpStatus.OK);
 		} else {
-			throw new UserServiceException("User doesn't exist exception");
+			throw new UserServiceException("Check the user id or user doesn't exist");
 		}
 
 	}
